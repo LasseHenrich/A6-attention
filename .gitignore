@@ -1,0 +1,17 @@
+/data/
+/results/runs/
+/results/figures/
+/submission.json
+/submission_instructor.json
+/src_student_backup/
+/.reference_mode
+/src_reference/
+/assignment6.zip
+/A6-attention/
+/grader/grader.pyc
+/.venv
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
