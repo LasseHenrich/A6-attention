@@ -11,6 +11,7 @@ parts.
 """
 
 from __future__ import annotations
+import math
 
 import torch
 import torch.nn as nn
@@ -30,9 +31,32 @@ class TransformerBlock(nn.Module):
     def __init__(self, cfg: ExperimentConfig) -> None:
         super().__init__()
         self.cfg = cfg
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        
+        self.ln1 = nn.LayerNorm(cfg.d_model)
+        self.attn = MultiHeadAttention(cfg.d_model, cfg.num_heads)
+        self.ln2 = nn.LayerNorm(cfg.d_model)
+        
+        lin1 = nn.Linear(cfg.d_model, cfg.d_ff)
+        nn.init.xavier_uniform_(lin1.weight)
+        nn.init.zeros_(lin1.bias)
 
+        lin2 = nn.Linear(cfg.d_ff, cfg.d_model)
+        nn.init.xavier_uniform_(lin2.weight)
+        nn.init.zeros_(lin2.bias)
+        
+        scale = 1 / math.sqrt(2.0 / cfg.num_layers)
+        with torch.no_grad():
+            lin2.weight.mul_(scale)
+            self.attn.out_proj.weight.mul_(scale)
+        
+        self.ffn = nn.Sequential(
+            lin1,
+            nn.GELU(),
+            lin2
+        )
+        
+        self.dropout = nn.Dropout(cfg.dropout)
+        
     def forward(
         self,
         x: Tensor,
@@ -40,8 +64,21 @@ class TransformerBlock(nn.Module):
         attn_mask: Tensor | None = None,
         additive_bias: Tensor | None = None,
     ) -> Tensor:
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        norm_x = self.ln1(x)
+        x = x + self.dropout(
+            self.attn(
+                norm_x, norm_x, norm_x,
+                attn_mask=attn_mask,
+                additive_bias=additive_bias
+            )
+        )
+        
+        norm_x2 = self.ln2(x)
+        x = x + self.dropout(
+            self.ffn(norm_x2)
+        )
+        
+        return x
 
 
 class DecoderOnlyTransformer(SeqModel):
