@@ -14,6 +14,7 @@ is forbidden — this is additive attention, written by hand.
 """
 
 from __future__ import annotations
+import math
 
 import torch
 import torch.nn as nn
@@ -28,8 +29,10 @@ class AdditiveAttention(nn.Module):
         self.dec_dim = dec_dim
         self.enc_dim = enc_dim
         self.attn_dim = attn_dim
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+
+        self.W_q = nn.Linear(dec_dim, attn_dim, bias=False)
+        self.W_k = nn.Linear(enc_dim, attn_dim, bias=False)
+        self.v = nn.Linear(attn_dim, 1, bias=False)
 
     def forward(
         self,
@@ -44,5 +47,14 @@ class AdditiveAttention(nn.Module):
         ``PAD`` positions are removed from the softmax.  Returns
         ``(context [B, enc_dim], weights [B, S])``.
         """
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        query_proj = self.W_q(dec_state).unsqueeze(1)
+        key_proj = self.W_k(enc_states)
+        scores = self.v(torch.tanh(query_proj + key_proj)).squeeze(-1)
+        
+        if mask is not None:
+            scores = scores.masked_fill(~mask, -math.inf)
+        
+        weights = torch.softmax(scores, dim=-1)
+        context = torch.bmm(weights.unsqueeze(1), enc_states).squeeze(1)
+        
+        return context, weights

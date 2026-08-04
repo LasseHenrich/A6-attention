@@ -63,26 +63,26 @@ b_rnn_observations: dict[str, bool | None] = {
 
 # From `make demo-c` (recall-vs-distance overlay).  True / False.
 c_recall_observations: dict[str, bool | None] = {
-    "attention_makes_recall_perfect_at_every_distance": None,
-    "attention_improves_recall_over_the_plain_rnn": None,
-    "recall_still_decays_as_the_needle_moves_earlier": None,
+    "attention_makes_recall_perfect_at_every_distance": False,
+    "attention_improves_recall_over_the_plain_rnn": True,
+    "recall_still_decays_as_the_needle_moves_earlier": False,
 }
 
 # From `make demo-c` (decoder gradient-norm curve).  True / False.
 c_gradient_observations: dict[str, bool | None] = {
-    "attention_removes_the_vanishing_gradient_problem": None,
-    "gradient_norm_reaching_earlier_source_positions_shrinks": None,
+    "attention_removes_the_vanishing_gradient_problem": False,
+    "gradient_norm_reaching_earlier_source_positions_shrinks": True,
 }
 
 # From `make demo-c` (wall-clock vs sequence length).  True / False.
 c_serial_observations: dict[str, bool | None] = {
-    "attention_makes_the_rnn_parallel_over_time": None,
-    "inference_wall_clock_grows_with_sequence_length": None,
+    "attention_makes_the_rnn_parallel_over_time": False,
+    "inference_wall_clock_grows_with_sequence_length": True,
 }
 
 # Epistemic status of the residual faults (serial + vanishing gradients).
 # One of: "empirical" | "provable".
-c_fault_status: str | None = None
+c_fault_status: str | None = "empirical"
 
 
 # ===========================================================================

@@ -57,14 +57,14 @@ class Encoder(nn.Module):
     def __init__(self, cfg: ExperimentConfig) -> None:
         super().__init__()
         self.cfg = cfg
-        self.embedding = nn.Embedding(cfg.vocab_size, cfg.hidden_size)
+        self.embed = nn.Embedding(cfg.vocab_size, cfg.hidden_size)
         self.cell = RNNCell(cfg.hidden_size, cfg.hidden_size)
 
     def forward(self, src: Tensor) -> tuple[Tensor, Tensor]:
         """``src`` is ``[B, S]`` token ids."""
         batch_size, seq_len = src.shape
         
-        embedded = self.embedding(src)
+        embedded = self.embed(src)
         
         h_t = torch.zeros(batch_size, self.cfg.hidden_size, device=src.device, dtype=embedded.dtype)
         
@@ -94,7 +94,7 @@ class Decoder(nn.Module):
         self.attention = attention
         self.last_attn: Tensor | None = None
     
-        self.embedding = nn.Embedding(cfg.vocab_size, cfg.hidden_size)
+        self.embed = nn.Embedding(cfg.vocab_size, cfg.hidden_size)
         self.cell = RNNCell(cfg.hidden_size, cfg.hidden_size)
         self.out_head = nn.Linear(cfg.hidden_size, cfg.vocab_size)
 
@@ -113,7 +113,7 @@ class Decoder(nn.Module):
         """
         batch_size, seq_len = tgt.shape
         
-        embedded = self.embedding(tgt)
+        embedded = self.embed(tgt)
         
         h_t = enc_final
         
@@ -124,7 +124,7 @@ class Decoder(nn.Module):
             x_t = embedded[:, t, :]
             h_t = self.cell(x_t, h_t)
             if self.attention is not None:
-                _, attn_w = self.attention(h_t, enc_states, src_mask=src_mask)
+                _, attn_w = self.attention(h_t, enc_states, mask=src_mask)
                 attn_weights_list.append(attn_w)
             step_logits = self.out_head(h_t)
             logits_list.append(step_logits)
