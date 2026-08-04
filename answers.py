@@ -19,15 +19,15 @@ from __future__ import annotations
 # Architecture facts about the RNN you built (True / False).  Read them off
 # the shape/parameter walk (`make demo-a`); some statements are false.
 a_observations: dict[str, bool | None] = {
-    "encoder_returns_a_hidden_state_for_every_source_token": None,
-    "decoder_sees_source_only_through_final_state": None,
-    "an_untrained_rnn_scores_at_chance_on_copy": None,
-    "the_cell_uses_different_weights_at_each_time_step": None,
+    "encoder_returns_a_hidden_state_for_every_source_token": True,
+    "decoder_sees_source_only_through_final_state": True,
+    "an_untrained_rnn_scores_at_chance_on_copy": True,
+    "the_cell_uses_different_weights_at_each_time_step": False,
 }
 
 # The model's total parameter count for the provided default config.  Read it
 # from the parameter walk printed by `make demo-a`.
-a_param_count: int | None = None
+a_param_count: int | None = 20758
 
 
 # ===========================================================================

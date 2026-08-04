@@ -34,13 +34,17 @@ class RNNCell(nn.Module):
         super().__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        
+        self.W_hh = nn.Linear(hidden_size, hidden_size, bias=False)
+        torch.nn.init.orthogonal_(self.W_hh.weight)
+        
+        self.W_ih = nn.Linear(input_size, hidden_size)
+        torch.nn.init.xavier_uniform_(self.W_ih.weight)
+        torch.nn.init.zeros_(self.W_ih.bias)
 
     def forward(self, x_t: Tensor, h_prev: Tensor) -> Tensor:
         """``x_t`` is ``[B, input_size]``, ``h_prev`` ``[B, hidden_size]``."""
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        return torch.tanh(self.W_ih(x_t) + self.W_hh(h_prev))
 
 
 class Encoder(nn.Module):
@@ -53,13 +57,27 @@ class Encoder(nn.Module):
     def __init__(self, cfg: ExperimentConfig) -> None:
         super().__init__()
         self.cfg = cfg
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        self.embedding = nn.Embedding(cfg.vocab_size, cfg.hidden_size)
+        self.cell = RNNCell(cfg.hidden_size, cfg.hidden_size)
 
     def forward(self, src: Tensor) -> tuple[Tensor, Tensor]:
         """``src`` is ``[B, S]`` token ids."""
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        batch_size, seq_len = src.shape
+        
+        embedded = self.embedding(src)
+        
+        h_t = torch.zeros(batch_size, self.cfg.hidden_size, device=src.device, dtype=embedded.dtype)
+        
+        hidden_states = []
+        for t in range(seq_len):
+            x_t = embedded[:, t, :]
+            h_t = self.cell(x_t, h_t)
+            hidden_states.append(h_t)
+            
+        all_hidden = torch.stack(hidden_states, dim=1)
+        final_state = h_t
+        
+        return all_hidden, final_state
 
 
 class Decoder(nn.Module):
@@ -75,8 +93,10 @@ class Decoder(nn.Module):
         self.cfg = cfg
         self.attention = attention
         self.last_attn: Tensor | None = None
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+    
+        self.embedding = nn.Embedding(cfg.vocab_size, cfg.hidden_size)
+        self.cell = RNNCell(cfg.hidden_size, cfg.hidden_size)
+        self.out_head = nn.Linear(cfg.hidden_size, cfg.vocab_size)
 
     def forward(
         self,
@@ -91,8 +111,29 @@ class Decoder(nn.Module):
         Returns logits ``[B, T, VOCAB]``; ``logits[:, t]`` predicts the
         target at step ``t`` from decoder inputs ``0 .. t``.
         """
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        batch_size, seq_len = tgt.shape
+        
+        embedded = self.embedding(tgt)
+        
+        h_t = enc_final
+        
+        logits_list = []
+        attn_weights_list = []
+        
+        for t in range(seq_len):
+            x_t = embedded[:, t, :]
+            h_t = self.cell(x_t, h_t)
+            if self.attention is not None:
+                _, attn_w = self.attention(h_t, enc_states, src_mask=src_mask)
+                attn_weights_list.append(attn_w)
+            step_logits = self.out_head(h_t)
+            logits_list.append(step_logits)
+            
+        if attn_weights_list:
+            self.last_attn = torch.stack(attn_weights_list, dim=1)
+        
+        logits = torch.stack(logits_list, dim=1)
+        return logits
 
 
 class Seq2SeqRNN(SeqModel):
@@ -103,12 +144,13 @@ class Seq2SeqRNN(SeqModel):
     def __init__(self, cfg: ExperimentConfig, *, attention: nn.Module | None = None) -> None:
         super().__init__()
         self.cfg = cfg
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        self.encoder = Encoder(cfg)
+        self.decoder = Decoder(cfg, attention=attention)
 
     def forward(self, batch: Batch) -> Tensor:
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        enc_states, enc_final = self.encoder(batch.source)
+        logits = self.decoder(tgt=batch.target_in, enc_states=enc_states, enc_final=enc_final, src_mask=batch.source_padding_mask)
+        return logits
 
     @torch.no_grad()
     def generate(self, batch: Batch, max_len: int) -> Tensor:
