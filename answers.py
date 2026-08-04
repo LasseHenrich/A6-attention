@@ -50,10 +50,10 @@ b_symptom_observations: dict[str, bool | None] = {
 
 # The trained RNN's battery profile, read off `make demo-b` (True / False).
 b_rnn_observations: dict[str, bool | None] = {
-    "the_rnn_solves_sort_perfectly_at_long_lengths": None,
-    "the_trained_rnn_beats_an_untrained_one_on_short_tasks": None,
-    "the_baseline_rnn_already_uses_attention": None,
-    "exact_sequence_tasks_like_copy_are_among_the_hardest_for_the_rnn": None,
+    "the_rnn_solves_sort_perfectly_at_long_lengths": False,
+    "the_trained_rnn_beats_an_untrained_one_on_short_tasks": True,
+    "the_baseline_rnn_already_uses_attention": False,
+    "exact_sequence_tasks_like_copy_are_among_the_hardest_for_the_rnn": True,
 }
 
 
