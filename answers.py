@@ -138,22 +138,22 @@ e_order_status: str | None = "provable"
 
 # From `make demo-f` (accuracy vs eval length per scheme).  True / False.
 f_length_observations: dict[str, bool | None] = {
-    "learned_absolute_pe_cliffs_beyond_the_trained_length": None,
-    "learned_absolute_pe_extrapolates_as_well_as_alibi": None,
-    "no_pe_fails_order_tasks": None,
-    "alibi_extrapolates_to_longer_sequences": None,
+    "learned_absolute_pe_cliffs_beyond_the_trained_length": True,
+    "learned_absolute_pe_extrapolates_as_well_as_alibi": False,
+    "no_pe_fails_order_tasks": True,
+    "alibi_extrapolates_to_longer_sequences": True,
 }
 
 # From `make demo-f` (ALiBi-vs-sinusoidal recall).  True / False.
 f_alibi_observations: dict[str, bool | None] = {
-    "alibi_biases_attention_toward_nearby_positions": None,
-    "alibi_has_no_downside": None,
-    "alibis_locality_prior_can_hurt_long_range_recall": None,
+    "alibi_biases_attention_toward_nearby_positions": True,
+    "alibi_has_no_downside": False,
+    "alibis_locality_prior_can_hurt_long_range_recall": True,
 }
 
 # Epistemic status.  One of: "empirical" | "provable".
-f_abs_pe_status: str | None = None
-f_alibi_status: str | None = None
+f_abs_pe_status: str | None = "empirical"
+f_alibi_status: str | None = "empirical"
 
 
 # ===========================================================================
