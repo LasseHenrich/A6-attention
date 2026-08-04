@@ -33,8 +33,16 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         self.head_dim = d_model // num_heads
         self.last_attn: Tensor | None = None
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        
+        self.q_proj = nn.Linear(d_model, d_model, bias=bias)
+        self.k_proj = nn.Linear(d_model, d_model, bias=bias)
+        self.v_proj = nn.Linear(d_model, d_model, bias=bias)
+        self.out_proj = nn.Linear(d_model, d_model, bias=bias)
+        
+        for proj in (self.q_proj, self.k_proj, self.v_proj, self.out_proj):
+            nn.init.xavier_uniform_(proj.weight)
+            if bias:
+                nn.init.zeros_(proj.bias)
 
     def _split_heads(self, x: Tensor) -> Tensor:
         """``[B, L, d_model] -> [B, num_heads, L, head_dim]``."""
@@ -51,5 +59,19 @@ class MultiHeadAttention(nn.Module):
         additive_bias: Tensor | None = None,
     ) -> Tensor:
         """Self-attention: ``q_in = k_in = v_in``.  Cross-attention: distinct."""
-        # ------ WRITE YOUR CODE HERE ------
-        raise NotImplementedError("implement this for the task")
+        q = self.q_proj(q_in)
+        k = self.k_proj(k_in)
+        v = self.v_proj(v_in)
+        
+        q_heads = self._split_heads(q)
+        k_heads = self._split_heads(k)
+        v_heads = self._split_heads(v)
+        
+        attn_out, attn_weights = scaled_dot_product_attention(q_heads, k_heads, v_heads, mask=attn_mask, additive_bias=additive_bias)
+        
+        b, _, l_q, _ = attn_out.shape
+        attn_out = attn_out.transpose(1, 2).contiguous().view(b, l_q, self.d_model)
+        
+        self.last_attn = attn_weights
+        
+        return self.out_proj(attn_out)

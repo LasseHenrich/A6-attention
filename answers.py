@@ -115,21 +115,21 @@ d_equivariance_status: str | None = "provable"
 
 # From `make demo-e` (single-vs-multi accuracy; per-head entropy).  T / F.
 e_head_observations: dict[str, bool | None] = {
-    "heads_specialize_to_different_positions": None,
-    "multiple_heads_solve_the_two_relation_task": None,
-    "a_single_head_plateaus_on_the_two_relation_task": None,
-    "more_heads_always_raise_accuracy_on_every_task": None,
+    "heads_specialize_to_different_positions": True,
+    "multiple_heads_solve_the_two_relation_task": True,
+    "a_single_head_plateaus_on_the_two_relation_task": True,
+    "more_heads_always_raise_accuracy_on_every_task": False,
 }
 
 # From `make demo-e` (order-blindness persists).  True / False.
 e_order_observations: dict[str, bool | None] = {
-    "multi_head_attention_is_still_order_blind_without_positions": None,
-    "adding_heads_gives_the_model_a_sense_of_position": None,
+    "multi_head_attention_is_still_order_blind_without_positions": True,
+    "adding_heads_gives_the_model_a_sense_of_position": False,
 }
 
 # Epistemic status.  One of: "empirical" | "provable".
-e_two_relation_status: str | None = None
-e_order_status: str | None = None
+e_two_relation_status: str | None = "empirical"
+e_order_status: str | None = "provable"
 
 
 # ===========================================================================
