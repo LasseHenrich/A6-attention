@@ -91,22 +91,22 @@ c_fault_status: str | None = "empirical"
 
 # From `make demo-d` (scaling ablation).  True / False.
 d_scaling_observations: dict[str, bool | None] = {
-    "unscaled_attention_saturates_the_softmax": None,
-    "scaling_changes_what_the_model_can_represent": None,
-    "scaling_restores_useful_gradients": None,
-    "unscaled_scores_grow_with_key_dimension": None,
+    "unscaled_attention_saturates_the_softmax": True,
+    "scaling_changes_what_the_model_can_represent": False,
+    "scaling_restores_useful_gradients": True,
+    "unscaled_scores_grow_with_key_dimension": True,
 }
 
 # From `make demo-d` (permutation-equivariance panel).  True / False.
 d_equivariance_observations: dict[str, bool | None] = {
-    "bare_self_attention_can_learn_reverse_with_enough_training": None,
-    "a_causal_mask_leaks_position_information": None,
-    "permuting_the_input_permutes_the_output": None,
+    "bare_self_attention_can_learn_reverse_with_enough_training": False,
+    "a_causal_mask_leaks_position_information": True,
+    "permuting_the_input_permutes_the_output": True,
 }
 
 # Epistemic status of each fault.  One of: "empirical" | "provable".
-d_scaling_status: str | None = None
-d_equivariance_status: str | None = None
+d_scaling_status: str | None = "empirical"
+d_equivariance_status: str | None = "provable"
 
 
 # ===========================================================================

@@ -37,5 +37,20 @@ def scaled_dot_product_attention(
     (e.g. ALiBi) is added to the scores before the softmax.  Returns
     ``(output [..., L, d], weights [..., Lq, Lk])``.
     """
-    # ------ WRITE YOUR CODE HERE ------
-    raise NotImplementedError("implement this for the task")
+    scores = q @ k.transpose(-2, -1) * (scale if scale is not None else (1 / math.sqrt(q.shape[-1])))
+    
+    if additive_bias is not None:
+        scores += additive_bias
+    
+    if mask is not None:
+        if mask.dtype == torch.float:
+            scores += mask
+        elif mask.dtype == torch.bool:
+            scores = scores.masked_fill(~mask, -math.inf)
+        else:
+            raise ValueError("mask dtype must be float or bool")
+    
+    weights = torch.softmax(scores, dim=-1)
+    output = weights @ v
+    
+    return output, weights
