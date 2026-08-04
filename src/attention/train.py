@@ -41,9 +41,11 @@ def masked_cross_entropy(
     prompt positions, so ``PAD``/prompt must never contribute.  ``logits`` is
     ``[B, T, V]``, ``targets`` ``[B, T]``, ``loss_mask`` ``[B, T]``.
     """
-    b, t, v = logits.shape
+    mask = loss_mask.bool()
+    _logits = logits[mask]
+    _targets = targets[mask]
     ce = F.cross_entropy(
-        logits.reshape(b * t, v), targets.reshape(b * t), reduction="mean"
+        _logits, _targets, reduction="mean"
     )
     return ce
 
@@ -56,14 +58,14 @@ def train_step(
     grad_clip: float | None,
 ) -> float:
     """One optimizer step; returns the (detached) scalar loss."""
+    optimizer.zero_grad(set_to_none=True)
     logits = model(batch)
     loss = masked_cross_entropy(logits, batch.targets, batch.loss_mask)
     loss.backward()
-    optimizer.zero_grad(set_to_none=True)
-    optimizer.step()
     if grad_clip is not None:
         clip_grad_norm_(model.parameters(), grad_clip)
-    return loss
+    optimizer.step()
+    return loss.item()
 
 
 @torch.no_grad()
@@ -169,7 +171,7 @@ def train(
     scheduler = build_scheduler(optimizer, cfg)
     history = History()
     for step in range(cfg.steps):
-        model.eval()
+        model.train()
         batch = train_gen.next_batch(cfg.batch_size).to(cfg.device)
         loss = train_step(model, batch, optimizer, grad_clip=cfg.grad_clip)
         if scheduler is not None:

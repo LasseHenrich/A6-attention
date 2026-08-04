@@ -36,7 +36,7 @@ a_param_count: int | None = 20758
 
 # The line numbers of the 5 bugs in the DISTRIBUTED src/attention/train.py.
 # Record them BEFORE you start editing (your edits shift the line numbers).
-b_bug_lines: list[int] | None = None
+b_bug_lines: list[int] | None = [46,62,65,66,172]
 
 # Symptom -> cause reasoning about training-loop bugs (True / False).  Some
 # statements are deliberately false.
